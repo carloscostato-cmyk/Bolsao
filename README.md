@@ -2,10 +2,13 @@
 
 Sistema web para gerenciamento, controle de consumo e conciliação de licenças Fortinet baseadas em pontos. Desenvolvido em Python/Flask com banco de dados SQLite.
 
+**URL em produção:** https://bolsao.onrender.com
+
 ---
 
 ## Funcionalidades
 
+- **Login seguro** — acesso protegido por usuário e senha com tela de autenticação
 - **Dashboard** — visão consolidada por grupo (Responsável + Projeto) com pontos totais, consumidos, saldo e percentual de utilização
 - **Pontos Bolsão** — cadastro e listagem dos Point Packs adquiridos
 - **Pontos Utilizados** — registro de equipamentos FortiGate com cálculo automático de consumo diário
@@ -13,13 +16,25 @@ Sistema web para gerenciamento, controle de consumo e conciliação de licenças
 
 ---
 
+## Acesso ao sistema
+
+| Campo | Valor |
+|---|---|
+| URL | https://bolsao.onrender.com |
+| Usuário | EstratOpera |
+| Senha | Bolsao26 |
+
+> ⚠️ Qualquer página acessada sem login redireciona automaticamente para a tela de autenticação.
+
+---
+
 ## Tecnologias
 
 - Python 3.14
 - Flask 3.0.3
-- SQLite (via módulo nativo `sqlite3`)
+- SQLite (via módulo nativo `sqlite3`) com WAL mode para concorrência
 - openpyxl 3.1.2 (leitura de arquivos Excel)
-- Gunicorn (produção)
+- Gunicorn 22.0.0 (produção)
 
 ---
 
@@ -28,8 +43,8 @@ Sistema web para gerenciamento, controle de consumo e conciliação de licenças
 ### 1. Clone o repositório
 
 ```bash
-git clone <url-do-repositorio>
-cd sistema_py
+git clone https://github.com/carloscostato-cmyk/Bolsao.git
+cd Bolsao
 ```
 
 ### 2. Crie e ative o ambiente virtual
@@ -50,13 +65,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 4. Inicialize o banco de dados
-
-```bash
-python database.py
-```
-
-### 5. Rode o servidor
+### 4. Rode o servidor
 
 ```bash
 python app.py
@@ -64,21 +73,25 @@ python app.py
 
 Acesse em: **http://127.0.0.1:5000**
 
+> O banco de dados (`sistema.db`) e as tabelas são criados automaticamente na primeira execução.
+
 ---
 
 ## Estrutura do projeto
 
 ```
 sistema_py/
-├── app.py                  # Rotas e lógica principal (Flask)
-├── database.py             # Criação das tabelas SQLite
-├── wsgi.py                 # Entry point para produção (Gunicorn)
-├── requirements.txt        # Dependências Python
-├── sistema.db              # Banco de dados SQLite (gerado automaticamente)
+├── app.py                      # Rotas, lógica principal e autenticação (Flask)
+├── database.py                 # Criação manual das tabelas SQLite
+├── wsgi.py                     # Entry point para produção (Gunicorn)
+├── Procfile                    # Configuração de deploy (gunicorn app:app)
+├── requirements.txt            # Dependências Python
+├── sistema.db                  # Banco de dados SQLite
 ├── static/
-│   ├── claro.css           # Estilos globais
-│   └── claro_empresas2.jpg # Logo Claro Empresas
+│   ├── claro.css               # Estilos globais
+│   └── claro_empresas2.jpg     # Logo Claro Empresas
 └── templates/
+    ├── login.html              # Tela de login
     ├── index.html              # Dashboard
     ├── pontos_bolsao.html      # Listagem de Point Packs
     ├── novo_bolsao.html        # Formulário de novo bolsão
@@ -91,19 +104,21 @@ sistema_py/
 
 ## Banco de dados
 
+O banco é inicializado automaticamente pelo `app.py` ao subir. Usa **WAL mode** para evitar travamentos em ambiente de produção.
+
 ### `pontos_bolsao`
 Armazena os pacotes de pontos adquiridos (Point Packs).
 
 | Campo | Tipo | Descrição |
 |---|---|---|
 | id | INTEGER | Chave primária |
-| point_pack_number | TEXT | Identificador único do pacote (ex: ELAVM...) |
+| point_pack_number | TEXT UNIQUE | Identificador único do pacote (ex: ELAVM...) |
 | responsavel | TEXT | Equipe: Delivery, Projetos Especiais, Produtos |
 | projetos | TEXT | Subprojeto: Pull, SIEM, Aeronáltica, etc. |
 | pontos | INTEGER | Total de pontos do pacote |
 | used_amount | REAL | Pontos já utilizados (base Fortinet) |
-| registration_date | TEXT | Data de registro |
-| expiration_date | TEXT | Data de expiração |
+| registration_date | TEXT | Data de registro (AAAA-MM-DD) |
+| expiration_date | TEXT | Data de expiração (AAAA-MM-DD) |
 
 ### `pontos_utilizados`
 Registra cada equipamento FortiGate e seu consumo diário.
@@ -117,10 +132,10 @@ Registra cada equipamento FortiGate e seu consumo diário.
 | product_model | TEXT | Modelo (FG120G, FG2H0G, etc.) |
 | valor_pontos_dia | REAL | Custo em pontos por dia |
 | data_aplicacao | TEXT | Data de início do consumo |
-| data_fim | TEXT | Data de término (opcional) |
+| data_fim | TEXT | Data de término (opcional — vazio = ativo) |
 
 ### `base_conciliacao`
-Base oficial exportada da Fortinet. Substituída a cada upload.
+Base oficial exportada da Fortinet. Substituída integralmente a cada upload.
 
 | Campo | Tipo | Descrição |
 |---|---|---|
@@ -135,22 +150,33 @@ Base oficial exportada da Fortinet. Substituída a cada upload.
 ## Lógica de cálculo
 
 ```
-Dias Consumidos  = hoje - data_aplicacao  (ou data_fim - data_aplicacao se encerrado)
+Dias Consumidos   = hoje − data_aplicacao  (ou data_fim − data_aplicacao se encerrado)
 Pontos Calculados = valor_pontos_dia × dias_consumidos
 
 Conciliação = SUM(points) da base_conciliacao WHERE serial_number = serial do equipamento
-Diferença   = Pontos Calculados - Pontos Fortinet
+Diferença   = Pontos Calculados − Pontos Fortinet
 ```
 
 ---
 
-## Deploy (produção)
+## Segurança
 
-O projeto inclui `Procfile` para deploy em plataformas como Heroku/Railway:
+- Todas as rotas protegidas com `@login_required` — sem login não acessa nada
+- Queries com parâmetros `?` — proteção contra SQL injection
+- `secret_key` configurada para proteção de sessão Flask
+- WAL mode no SQLite — evita `database is locked` em produção
+
+---
+
+## Deploy (produção — Render.com)
+
+O projeto usa `Procfile` com:
 
 ```
-web: gunicorn wsgi:app
+web: gunicorn app:app
 ```
+
+O Render detecta automaticamente novos commits no branch `master` e faz redeploy.
 
 ---
 

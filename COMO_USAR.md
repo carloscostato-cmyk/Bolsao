@@ -2,9 +2,25 @@
 
 ---
 
+## Acesso
+
+Acesse **https://bolsao.onrender.com** e faça login com:
+
+| Campo | Valor |
+|---|---|
+| Usuário | EstratOpera |
+| Senha | Bolsao26 |
+
+> Sem login, qualquer página redireciona automaticamente para a tela de autenticação.
+> Para sair, clique em **Sair** no menu de navegação.
+
+---
+
 ## Visão geral do fluxo
 
 ```
+0. Login
+        ↓
 1. Cadastrar Bolsão (Point Pack)
         ↓
 2. Registrar Equipamentos (Pontos Utilizados)
@@ -30,10 +46,12 @@
 | Pontos | Total de pontos do pacote (ex: 50000) |
 | Usados | Pontos já consumidos segundo a Fortinet (pode ser 0) |
 | Restantes | Calculado automaticamente: Pontos − Usados |
-| Data Registro | Data em que o pacote foi adquirido |
-| Data Expiração | Data de validade do pacote |
+| Data Registro | Data em que o pacote foi adquirido (DD/MM/AAAA) |
+| Data Expiração | Data de validade do pacote (DD/MM/AAAA) |
 
-✅ Após salvar, o bolsão aparece na listagem de **Pontos Bolsão**.
+✅ Após salvar, o bolsão aparece na listagem de **Pontos Bolsão** com datas no formato DD/MM/AAAA.
+
+> ⚠️ O Número do Pack deve ser único. Se tentar cadastrar um número já existente, o sistema exibe mensagem de erro sem travar.
 
 ---
 
@@ -45,7 +63,7 @@
 
 | Campo | O que preencher |
 |---|---|
-| Bolsão (Point Pack) | Selecione o bolsão ao qual este equipamento pertence |
+| Bolsão | Selecione o grupo (Responsável + Projeto) — aparece apenas 1 opção por grupo, sempre o pack com maior saldo |
 | Serial | Número de série do equipamento (ex: FG120GTK25003745) |
 | Dados do Cliente | Nome do cliente ou site onde está instalado |
 | Modelo do Produto | Modelo do equipamento (ex: FG120G, FG2H0G) |
@@ -117,6 +135,9 @@ A coluna **Diferença** mostra exatamente quanto os valores divergem.
 
 ```
 ┌─────────────────────────────────────────────────────────┐
+│  PASSO 0   Faça login                                   │
+│            https://bolsao.onrender.com                  │
+├─────────────────────────────────────────────────────────┤
 │  PASSO 1   Cadastre o bolsão (Point Pack)               │
 │            Menu > Pontos Bolsão > Adicionar             │
 ├─────────────────────────────────────────────────────────┤
@@ -139,3 +160,6 @@ A coluna **Diferença** mostra exatamente quanto os valores divergem.
 - Se um equipamento ainda está ativo, **deixe o campo Data Fim em branco** — o sistema calcula o consumo até hoje automaticamente.
 - A importação da base de conciliação **substitui** os dados anteriores. Sempre importe o relatório mais recente.
 - O campo **Responsável** tem 3 opções fixas: **Delivery**, **Projetos Especiais** e **Produtos**.
+- O campo **Bolsão** no formulário de novo equipamento mostra apenas **1 opção por grupo** — o sistema escolhe automaticamente o pack com maior saldo disponível.
+- Datas são exibidas no formato **DD/MM/AAAA** (padrão brasileiro).
+- Para sair do sistema, clique em **Sair** no menu de navegação.
