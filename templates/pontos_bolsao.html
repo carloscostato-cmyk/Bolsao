@@ -49,8 +49,8 @@
                         <td>{{ "{:,.0f}".format(ponto.pontos).replace(",", ".") }}</td>
                         <td>{{ "{:,.2f}".format(ponto.used_amount).replace(",", ".") }}</td>
                         <td class="number">{{ "{:,.0f}".format(ponto.pontos - ponto.used_amount).replace(",", ".") }}</td>
-                        <td>{{ ponto.registration_date }}</td>
-                        <td>{{ ponto.expiration_date }}</td>
+                        <td>{% if ponto.registration_date %}{{ ponto.registration_date.split('-')[2] }}/{{ ponto.registration_date.split('-')[1] }}/{{ ponto.registration_date.split('-')[0] }}{% endif %}</td>
+                        <td>{% if ponto.expiration_date %}{{ ponto.expiration_date.split('-')[2] }}/{{ ponto.expiration_date.split('-')[1] }}/{{ ponto.expiration_date.split('-')[0] }}{% endif %}</td>
                     </tr>
                     {% else %}
                     <tr>
