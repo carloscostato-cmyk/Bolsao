@@ -127,25 +127,33 @@ def listar_pontos_bolsao():
 @app.route('/pontos_bolsao/novo', methods=['GET', 'POST'])
 def novo_ponto_bolsao():
     """Tela para adicionar um novo Point Pack."""
+    erro = None
     if request.method == 'POST':
-        conn = get_db_connection()
-        conn.execute('''
-            INSERT INTO pontos_bolsao (point_pack_number, responsavel, projetos, pontos, used_amount, registration_date, expiration_date)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        ''', (
-            request.form['point_pack_number'],
-            request.form['responsavel'],
-            request.form['projetos'],
-            int(request.form['pontos']),
-            int(request.form.get('used_amount', 0)),
-            request.form['registration_date'],
-            request.form['expiration_date']
-        ))
-        conn.commit()
-        conn.close()
-        return redirect(url_for('listar_pontos_bolsao'))
-    
-    return render_template('novo_bolsao.html')
+        try:
+            pontos     = int(request.form['pontos'])
+            used       = float(request.form.get('used_amount', 0) or 0)
+            conn = get_db_connection()
+            conn.execute('''
+                INSERT INTO pontos_bolsao (point_pack_number, responsavel, projetos, pontos, used_amount, registration_date, expiration_date)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                request.form['point_pack_number'],
+                request.form['responsavel'],
+                request.form['projetos'],
+                pontos,
+                used,
+                request.form['registration_date'],
+                request.form['expiration_date']
+            ))
+            conn.commit()
+            conn.close()
+            return redirect(url_for('listar_pontos_bolsao'))
+        except sqlite3.IntegrityError:
+            erro = 'Número do Pack já cadastrado. Use um número diferente.'
+        except Exception as e:
+            erro = f'Erro ao salvar: {str(e)}'
+
+    return render_template('novo_bolsao.html', erro=erro)
 
 @app.route('/pontos_utilizados')
 def listar_pontos_utilizados():
