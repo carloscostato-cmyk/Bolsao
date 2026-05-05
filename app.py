@@ -8,6 +8,50 @@ app = Flask(__name__)
 app.secret_key = 'claro-fortinet-2026'
 DB_PATH = os.path.join(os.path.dirname(__file__), 'sistema.db')
 
+def init_db():
+    """Garante que o banco e as tabelas existem ao iniciar."""
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS pontos_bolsao (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            point_pack_number TEXT NOT NULL UNIQUE,
+            responsavel TEXT NOT NULL,
+            projetos TEXT,
+            pontos INTEGER NOT NULL,
+            used_amount REAL DEFAULT 0,
+            registration_date TEXT,
+            expiration_date TEXT
+        )
+    ''')
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS pontos_utilizados (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            bolsao_id INTEGER,
+            serial_number TEXT NOT NULL,
+            dados_cliente TEXT,
+            product_model TEXT,
+            valor_pontos_dia REAL NOT NULL,
+            data_aplicacao TEXT NOT NULL,
+            data_fim TEXT,
+            FOREIGN KEY (bolsao_id) REFERENCES pontos_bolsao (id)
+        )
+    ''')
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS base_conciliacao (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            serial_number TEXT NOT NULL,
+            description TEXT,
+            usage_date TEXT,
+            points REAL NOT NULL
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
+# Inicializa o banco ao subir a aplicação
+init_db()
+
 def get_db_connection():
     """Cria uma conexão com o banco de dados."""
     conn = sqlite3.connect(DB_PATH)
