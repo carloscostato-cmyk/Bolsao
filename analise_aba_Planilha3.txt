@@ -1,0 +1,56 @@
+ABA: Planilha3
+Linhas: 11, Colunas: 16
+Celulas Mescladas: []
+
+--- CABECALHOS ---
+  A: None
+  B: None
+  C: None
+  D: None
+  E: None
+  F: None
+  G: None
+  H: None
+  I: None
+  J: None
+  K: None
+  L: None
+  M: None
+  N: None
+  O: None
+  P: None
+
+--- DADOS ---
+[5,J] Valor: 1 | Formula: 
+[5,K] Valor: 2 | Formula: 
+[5,L] Valor: 3 | Formula: 
+[5,M] Valor: 4 | Formula: 
+[5,N] Valor: 5 | Formula: 
+[5,O] Valor: 6 | Formula: 
+[5,P] Valor: 7 | Formula: 
+[6,J] Valor: 8 | Formula: 
+[6,K] Valor: 9 | Formula: 
+[6,L] Valor: 10 | Formula: 
+[6,M] Valor: 11 | Formula: 
+[6,N] Valor: 12 | Formula: 
+[6,O] Valor: 13 | Formula: 
+[6,P] Valor: 14 | Formula: 
+[7,J] Valor: 15 | Formula: 
+[7,K] Valor: 16 | Formula: 
+[7,L] Valor: 17 | Formula: 
+[7,M] Valor: 18 | Formula: 
+[7,N] Valor: 19 | Formula: 
+[7,O] Valor: 20 | Formula: 
+[7,P] Valor: 21 | Formula: 
+[8,J] Valor: 22 | Formula: 
+[8,K] Valor: 23 | Formula: 
+[8,L] Valor: 24 | Formula: 
+[8,M] Valor: 25 | Formula: 
+[8,N] Valor: 26 | Formula: 
+[8,O] Valor: 27 | Formula: 
+[8,P] Valor: 28 | Formula: 
+[9,J] Valor: 29 | Formula: 
+[9,K] Valor: 30 | Formula: 
+[9,L] Valor: 31 | Formula: 
+[11,K] Valor: 20 | Formula: 
+[11,L] Valor: 12 | Formula: =$K$11*(3/5)

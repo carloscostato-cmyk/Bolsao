@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Novo Bolsão de Pontos - Claro Empresas</title>
+    <link rel="stylesheet" href="/static/claro.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-left">
+                <img src="{{ url_for('static', filename='claro_empresas2.jpg') }}" alt="Claro Empresas" class="logo">
+                <h1>Novo Bolsão de Pontos</h1>
+            </div>
+            <nav>
+                <a href="{{ url_for('dashboard') }}">Dashboard</a>
+                <a href="{{ url_for('listar_pontos_bolsao') }}">Pontos Bolsão</a>
+                <a href="{{ url_for('listar_pontos_utilizados') }}">Pontos Utilizados</a>
+                <a href="{{ url_for('conciliacao') }}">Conciliação</a>
+            </nav>
+        </header>
+        <div class="form-content">
+            <form method="post">
+                <div class="section">
+                    <div class="section-title"><span class="section-number">1</span>Informações do Bolsão</div>
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label for="point_pack_number">Número do Pack</label>
+                            <input type="text" name="point_pack_number" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="responsavel">Responsável</label>
+                            <select name="responsavel" required>
+                                <option value="" disabled selected>Selecione...</option>
+                                <option value="Delivery">Delivery</option>
+                                <option value="Projetos Especiais">Projetos Especiais</option>
+                                <option value="Produtos">Produtos</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="projetos">Projeto</label>
+                        <input type="text" name="projetos" required>
+                    </div>
+                    <div class="grid-3">
+                        <div class="form-group">
+                            <label for="pontos">Pontos</label>
+                            <input type="number" name="pontos" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="used_amount">Usados</label>
+                            <input type="number" name="used_amount" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="remaining_amount">Restantes</label>
+                            <input type="number" name="remaining_amount" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="section">
+                    <div class="section-title"><span class="section-number">2</span>Datas e Prazos</div>
+                    <div class="grid-3">
+                        <div class="form-group">
+                            <label for="registration_date">Data Registro</label>
+                            <input type="date" name="registration_date" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="expiration_date">Data Expiração</label>
+                            <input type="date" name="expiration_date" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="previsao_inicio">Previsão Início</label>
+                            <input type="date" name="previsao_inicio">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="tempo_projeto_meses">Tempo Projeto (meses)</label>
+                        <input type="number" name="tempo_projeto_meses" style="max-width:250px;">
+                    </div>
+                </div>
+                <button type="submit" class="btn-submit">Salvar Bolsão</button>
+            </form>
+        </div>
+        <footer>
+            <p>Sistema de Controle de Licenças Fortinet</p>
+        </footer>
+    </div>
+</body>
+</html>

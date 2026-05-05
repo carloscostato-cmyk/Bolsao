@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Novo Ponto Utilizado - Fortinet</title>
+    <link rel="stylesheet" href="/static/claro.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-left">
+                <img src="{{ url_for('static', filename='claro_empresas2.jpg') }}" alt="Claro Empresas" class="logo">
+                <h1>Novo Ponto Utilizado</h1>
+            </div>
+            <nav>
+                <a href="{{ url_for('dashboard') }}">Dashboard</a>
+                <a href="{{ url_for('listar_pontos_bolsao') }}">Pontos Bolsão</a>
+                <a href="{{ url_for('listar_pontos_utilizados') }}">Pontos Utilizados</a>
+                <a href="{{ url_for('conciliacao') }}">Conciliação</a>
+            </nav>
+        </header>
+        <div class="form-content">
+            <form method="post">
+                <div class="section">
+                    <div class="section-title"><span class="section-number">1</span>Dados de Consumo</div>
+                    <div class="form-group">
+                        <label for="bolsao_id">Bolsão (Point Pack)</label>
+                        <select name="bolsao_id" required>
+                            <option value="" disabled selected>Selecione...</option>
+                            {% for b in bolsoes %}
+                            <option value="{{ b.id }}">{{ b.responsavel }} ({{ b.projetos }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="serial_number">Serial</label>
+                        <input type="text" name="serial_number" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="dados_cliente">Dados do Cliente</label>
+                        <input type="text" name="dados_cliente">
+                    </div>
+                    <div class="form-group">
+                        <label for="product_model">Modelo do Produto</label>
+                        <input type="text" name="product_model">
+                    </div>
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label for="valor_pontos_dia">Valor Pontos Dia</label>
+                            <input type="number" step="0.01" name="valor_pontos_dia" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="data_aplicacao">Data Aplicação</label>
+                            <input type="date" name="data_aplicacao" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="data_fim">Data Fim (opcional)</label>
+                        <input type="date" name="data_fim">
+                    </div>
+                </div>
+                <button type="submit" class="btn-submit">Salvar Consumo</button>
+            </form>
+        </div>
+        <footer>
+            <p>Sistema de Controle de Licenças Fortinet</p>
+        </footer>
+    </div>
+</body>
+</html>

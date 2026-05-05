@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Controle de Licenças Fortinet</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='claro.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-left">
+                <img src="{{ url_for('static', filename='claro_empresas2.jpg') }}" alt="Claro Empresas" class="logo">
+                <h1>Dashboard - Controle de Licenças</h1>
+            </div>
+            <nav>
+                <a href="{{ url_for('dashboard') }}" class="active">Dashboard</a>
+                <a href="{{ url_for('listar_pontos_bolsao') }}">Pontos Bolsão</a>
+                <a href="{{ url_for('listar_pontos_utilizados') }}">Pontos Utilizados</a>
+                <a href="{{ url_for('conciliacao') }}">Conciliação</a>
+            </nav>
+        </header>
+        
+        <main>
+            <h2>Visão Geral dos Pontos</h2>
+            
+            <div class="dashboard-grid">
+                <div class="card">
+                    <h3>Visão Fortinet</h3>
+                    <p>Dados oficiais importados da Fortinet.</p>
+                </div>
+                <div class="card">
+                    <h3>Visão Analítica</h3>
+                    <p>Dados calculados pelo sistema com base no consumo diário.</p>
+                </div>
+                <div class="card">
+                    <h3>% de Utilização</h3>
+                    <p>Comparativo de consumo entre as duas visões.</p>
+                </div>
+            </div>
+
+            <h2>Consolidado por Grupo</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th rowspan="2" class="group-col">Grupo (Responsável + Projeto)</th>
+                        <th rowspan="2" class="total-col">Pontos Totais</th>
+                        <th colspan="2" class="fortinet-col">Visão Fortinet</th>
+                        <th colspan="2" class="analitica-col">Visão Analítica</th>
+                        <th colspan="2" class="percent-col">% de Utilização</th>
+                    </tr>
+                    <tr>
+                        <th class="fortinet-col">Used Totais</th>
+                        <th class="fortinet-col">Remaining</th>
+                        <th class="analitica-col">Pontos Utilizados</th>
+                        <th class="analitica-col">Faltantes</th>
+                        <th class="percent-col">% Fortinet</th>
+                        <th class="percent-col">% Analítico</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in dashboard_data %}
+                    <tr>
+                        <td>{{ item.grupo }}</td>
+                        <td class="number">{{ "{:,.0f}".format(item.pontos_totais).replace(",", ".") }}</td>
+                        <td class="number">{{ "{:,.2f}".format(item.used_totais_fortinet).replace(",", ".") }}</td>
+                        <td class="number">{{ "{:,.2f}".format(item.remaining_totais_fortinet).replace(",", ".") }}</td>
+                        <td class="number">{{ "{:,.2f}".format(item.pontos_utilizados_analitico).replace(",", ".") }}</td>
+                        <td class="number">{{ "{:,.2f}".format(item.faltantes_analitico).replace(",", ".") }}</td>
+                        <td class="number">{{ "%.2f"|format(item.percent_fortinet) }}%</td>
+                        <td class="number">{{ "%.2f"|format(item.percent_analitico) }}%</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" style="text-align: center; padding: 20px;">Nenhum dado para exibir. Cadastre pacotes de pontos e seu uso.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </main>
+
+        <footer>
+            <p>Sistema de Controle de Licenças Fortinet</p>
+        </footer>
+    </div>
+</body>
+</html>

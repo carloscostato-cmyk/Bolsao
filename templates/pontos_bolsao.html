@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pontos Bolsão - Controle de Licenças</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='claro.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-left">
+                <img src="{{ url_for('static', filename='claro_empresas2.jpg') }}" alt="Claro Empresas" class="logo">
+                <h1>Pontos Bolsão (Point Packs)</h1>
+            </div>
+            <nav>
+                <a href="{{ url_for('dashboard') }}">Dashboard</a>
+                <a href="{{ url_for('listar_pontos_bolsao') }}" class="active">Pontos Bolsão</a>
+                <a href="{{ url_for('listar_pontos_utilizados') }}">Pontos Utilizados</a>
+                <a href="{{ url_for('conciliacao') }}">Conciliação</a>
+            </nav>
+        </header>
+        
+        <main>
+            <div class="actions">
+                <a href="{{ url_for('novo_ponto_bolsao') }}" class="button">Adicionar Novo Point Pack</a>
+            </div>
+
+            <h2>Catálogo de Pacotes de Pontos</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Point Pack Number</th>
+                        <th>Responsável</th>
+                        <th>Projeto</th>
+                        <th>Pontos</th>
+                        <th>Used (Fortinet)</th>
+                        <th>Remaining</th>
+                        <th>Registro</th>
+                        <th>Expiração</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ponto in pontos %}
+                    <tr>
+                        <td>{{ ponto.point_pack_number }}</td>
+                        <td>{{ ponto.responsavel }}</td>
+                        <td>{{ ponto.projetos }}</td>
+                        <td>{{ "{:,.0f}".format(ponto.pontos).replace(",", ".") }}</td>
+                        <td>{{ "{:,.2f}".format(ponto.used_amount).replace(",", ".") }}</td>
+                        <td class="number">{{ "{:,.0f}".format(ponto.pontos - ponto.used_amount).replace(",", ".") }}</td>
+                        <td>{{ ponto.registration_date }}</td>
+                        <td>{{ ponto.expiration_date }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7">Nenhum pacote de pontos cadastrado.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </main>
+
+        <footer>
+            <p>Sistema de Controle de Licenças Fortinet</p>
+        </footer>
+    </div>
+</body>
+</html>

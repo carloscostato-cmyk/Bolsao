@@ -1,0 +1,22 @@
+# Cache Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Arquivos temporários
+*.tmp
+*.log
+
+# Ambiente virtual — sobe conforme solicitado
+# .venv/   ← não ignorado
+
+# Banco de dados — sobe conforme solicitado
+# sistema.db ← não ignorado
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/

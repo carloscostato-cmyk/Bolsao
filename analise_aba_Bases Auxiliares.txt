@@ -1,0 +1,13 @@
+ABA: Bases Auxiliares
+Linhas: 4, Colunas: 2
+Celulas Mescladas: []
+
+--- CABECALHOS ---
+  A: None
+  B: Responsável
+
+--- DADOS ---
+[1,B] Valor: Responsável | Formula: 
+[2,B] Valor: Delivery | Formula: 
+[3,B] Valor: Projetos Especiais | Formula: 
+[4,B] Valor: Produtos | Formula: 
