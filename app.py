@@ -1,4 +1,5 @@
-from flask import Flask, render_template, request, redirect, url_for, jsonify, flash
+from flask import Flask, render_template, request, redirect, url_for, jsonify, flash, session
+from functools import wraps
 import sqlite3
 import os
 from datetime import datetime
@@ -7,6 +8,19 @@ import openpyxl
 app = Flask(__name__)
 app.secret_key = 'claro-fortinet-2026'
 DB_PATH = os.path.join(os.path.dirname(__file__), 'sistema.db')
+
+# Credenciais de acesso
+USUARIO = 'EstratOpera'
+SENHA   = 'Bolsao26'
+
+def login_required(f):
+    """Decorator que protege rotas — redireciona para login se não autenticado."""
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if not session.get('logado'):
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated
 
 import logging
 logging.basicConfig(level=logging.DEBUG)
@@ -64,7 +78,23 @@ def get_db_connection():
     conn.execute("PRAGMA busy_timeout=30000")
     return conn
 
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    erro = None
+    if request.method == 'POST':
+        if request.form['usuario'] == USUARIO and request.form['senha'] == SENHA:
+            session['logado'] = True
+            return redirect(url_for('dashboard'))
+        erro = 'Usuário ou senha incorretos.'
+    return render_template('login.html', erro=erro)
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('login'))
+
 @app.route('/')
+@login_required
 def dashboard():
     """
     Tela principal (Dashboard) que consolida as informações
@@ -123,6 +153,7 @@ def dashboard():
     return render_template('index.html', dashboard_data=dados_dashboard)
 
 @app.route('/pontos_bolsao')
+@login_required
 def listar_pontos_bolsao():
     """Lista todos os pacotes de pontos (Point Packs)."""
     conn = get_db_connection()
@@ -131,6 +162,7 @@ def listar_pontos_bolsao():
     return render_template('pontos_bolsao.html', pontos=pontos)
 
 @app.route('/pontos_bolsao/novo', methods=['GET', 'POST'])
+@login_required
 def novo_ponto_bolsao():
     """Tela para adicionar um novo Point Pack."""
     erro = None
@@ -162,6 +194,7 @@ def novo_ponto_bolsao():
     return render_template('novo_bolsao.html', erro=erro)
 
 @app.route('/pontos_utilizados')
+@login_required
 def listar_pontos_utilizados():
     """Lista todos os equipamentos e seu consumo de pontos."""
     conn = get_db_connection()
@@ -199,6 +232,7 @@ def listar_pontos_utilizados():
     return render_template('pontos_utilizados.html', data=pontos, total_pontos=total_pontos, media_pontos=media_pontos)
 
 @app.route('/pontos_utilizados/novo', methods=['GET', 'POST'])
+@login_required
 def novo_ponto_utilizado():
     """Tela para registrar o uso de pontos por um equipamento."""
     if request.method == 'POST':
@@ -239,6 +273,7 @@ def novo_ponto_utilizado():
     return render_template('novo_ponto_utilizado.html', bolsoes=grupos_unicos)
 
 @app.route('/conciliacao', methods=['GET', 'POST'])
+@login_required
 def conciliacao():
     """Página para upload e visualização da conciliação com a base Fortinet."""
     conn = get_db_connection()
