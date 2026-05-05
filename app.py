@@ -8,6 +8,9 @@ app = Flask(__name__)
 app.secret_key = 'claro-fortinet-2026'
 DB_PATH = os.path.join(os.path.dirname(__file__), 'sistema.db')
 
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
 def init_db():
     """Garante que o banco e as tabelas existem ao iniciar."""
     conn = sqlite3.connect(DB_PATH)
@@ -356,6 +359,25 @@ def conciliacao():
         linhas.append({**dict(r), 'diferenca': diff, 'status': status})
 
     return render_template('conciliacao.html', linhas=linhas, total_base=total_base)
+
+
+@app.route('/debug/status')
+def debug_status():
+    """Rota temporária de diagnóstico."""
+    import sys
+    try:
+        conn = get_db_connection()
+        tabelas = conn.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()
+        conn.close()
+        return {
+            'status': 'ok',
+            'python': sys.version,
+            'db_path': DB_PATH,
+            'db_exists': os.path.exists(DB_PATH),
+            'tabelas': [t['name'] for t in tabelas]
+        }
+    except Exception as e:
+        return {'status': 'erro', 'mensagem': str(e)}, 500
 
 
 if __name__ == '__main__':
