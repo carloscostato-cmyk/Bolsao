@@ -13,7 +13,8 @@ logging.basicConfig(level=logging.DEBUG)
 
 def init_db():
     """Garante que o banco e as tabelas existem ao iniciar."""
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH, timeout=30)
+    conn.execute("PRAGMA journal_mode=WAL")
     cursor = conn.cursor()
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS pontos_bolsao (
@@ -57,8 +58,10 @@ init_db()
 
 def get_db_connection():
     """Cria uma conexão com o banco de dados."""
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH, timeout=30, check_same_thread=False)
     conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA journal_mode=WAL")
+    conn.execute("PRAGMA busy_timeout=30000")
     return conn
 
 @app.route('/')
