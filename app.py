@@ -399,6 +399,24 @@ def conciliacao():
     return render_template('conciliacao.html', linhas=linhas, total_base=total_base)
 
 
+@app.route('/admin/limpar-banco', methods=['POST'])
+@login_required
+def limpar_banco():
+    """Rota administrativa para limpar todos os dados do banco em produção."""
+    conn = get_db_connection()
+    conn.execute('DELETE FROM pontos_utilizados')
+    conn.execute('DELETE FROM base_conciliacao')
+    conn.execute('DELETE FROM pontos_bolsao')
+    try:
+        conn.execute('DELETE FROM sqlite_sequence')
+    except Exception:
+        pass
+    conn.commit()
+    conn.close()
+    flash('Banco de dados limpo com sucesso!', 'sucesso')
+    return redirect(url_for('dashboard'))
+
+
 @app.route('/debug/status')
 def debug_status():
     """Rota temporária de diagnóstico."""
