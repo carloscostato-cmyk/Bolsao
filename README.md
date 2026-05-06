@@ -82,14 +82,13 @@ Acesse em: **http://127.0.0.1:5000**
 ```
 sistema_py/
 ├── app.py                      # Rotas, lógica principal e autenticação (Flask)
-├── database.py                 # Criação manual das tabelas SQLite
 ├── wsgi.py                     # Entry point para produção (Gunicorn)
 ├── Procfile                    # Configuração de deploy (gunicorn app:app)
 ├── requirements.txt            # Dependências Python
 ├── sistema.db                  # Banco de dados SQLite
 ├── static/
 │   ├── claro.css               # Estilos globais
-│   └── claro_empresas2.jpg     # Logo Claro Empresas
+│   └── claro_empresasII.jpg    # Logo Claro Empresas
 └── templates/
     ├── login.html              # Tela de login
     ├── index.html              # Dashboard
