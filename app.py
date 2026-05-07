@@ -2,12 +2,15 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 from functools import wraps
 import sqlite3
 import os
+import shutil
 from datetime import datetime
 import openpyxl
 
 app = Flask(__name__)
 app.secret_key = 'claro-fortinet-2026'
 DB_PATH = os.path.join(os.path.dirname(__file__), 'sistema.db')
+BACKUP_DIR = os.path.join(os.path.dirname(__file__), 'backups')
+ALLOW_DB_RESET = os.environ.get('ALLOW_DB_RESET', '').lower() in ('1', 'true', 'yes', 'on')
 
 USUARIO = 'EstratOpera'
 SENHA   = 'Bolsao26'
@@ -48,8 +51,6 @@ def init_db():
             valor_pontos_dia REAL NOT NULL,
             data_aplicacao TEXT NOT NULL,
             data_fim TEXT,
-            FOREIGN KEY (bolsao_id) REFERENCES pontos_bolsao (id)
-        )
     ''')
     cur.execute('''
         CREATE TABLE IF NOT EXISTS base_conciliacao (
@@ -73,6 +74,18 @@ def get_db_connection():
     conn.execute("PRAGMA journal_mode=WAL")
     conn.execute("PRAGMA busy_timeout=30000")
     return conn
+
+
+def backup_database(label='snapshot'):
+    if not os.path.exists(DB_PATH):
+        return None
+
+    os.makedirs(BACKUP_DIR, exist_ok=True)
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    filename = f'sistema_{label}_{timestamp}.db'
+    backup_path = os.path.join(BACKUP_DIR, filename)
+    shutil.copy2(DB_PATH, backup_path)
+    return backup_path
 
 
 # ── Autenticação ──────────────────────────────────────────────────────────────
@@ -176,6 +189,7 @@ def novo_ponto_bolsao():
             ))
             conn.commit()
             conn.close()
+            backup_database('pontos_bolsao')
             return redirect(url_for('listar_pontos_bolsao'))
         except sqlite3.IntegrityError:
             erro = 'Número do Pack já cadastrado. Use um número diferente.'
@@ -183,7 +197,6 @@ def novo_ponto_bolsao():
             erro = f'Erro ao salvar: {str(e)}'
 
     return render_template('novo_bolsao.html', erro=erro)
-
 
 # ── Pontos Utilizados ─────────────────────────────────────────────────────────
 
@@ -238,6 +251,7 @@ def novo_ponto_utilizado():
         ))
         conn.commit()
         conn.close()
+        backup_database('pontos_utilizados')
         return redirect(url_for('listar_pontos_utilizados'))
 
     conn = get_db_connection()
@@ -324,6 +338,7 @@ def conciliacao():
 
             conn.commit()
             flash(f'Base importada com sucesso! {rows_inseridos} registros carregados.', 'sucesso')
+            backup_database('conciliacao')
 
         except Exception as e:
             flash(f'Erro ao processar o arquivo: {str(e)}', 'erro')
@@ -375,6 +390,11 @@ def conciliacao():
 @app.route('/admin/limpar-banco', methods=['POST'])
 @login_required
 def limpar_banco():
+    if not ALLOW_DB_RESET:
+        flash('Limpeza do banco desabilitada neste ambiente.', 'erro')
+        return redirect(url_for('dashboard'))
+
+    backup_database('before_reset')
     conn = get_db_connection()
     conn.execute('DELETE FROM pontos_utilizados')
     conn.execute('DELETE FROM base_conciliacao')
