@@ -40,9 +40,22 @@ def init_db():
             pontos INTEGER NOT NULL,
             used_amount REAL DEFAULT 0,
             registration_date TEXT,
-            expiration_date TEXT
+            expiration_date TEXT,
+            previsao_inicio TEXT,
+            tempo_projeto_meses INTEGER
         )
     ''')
+    
+    # Adicionar colunas se não existirem (para compatibilidade com bancos antigos)
+    try:
+        cur.execute("ALTER TABLE pontos_bolsao ADD COLUMN previsao_inicio TEXT")
+    except:
+        pass
+    
+    try:
+        cur.execute("ALTER TABLE pontos_bolsao ADD COLUMN tempo_projeto_meses INTEGER")
+    except:
+        pass
     cur.execute('''
         CREATE TABLE IF NOT EXISTS pontos_utilizados (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -198,8 +211,8 @@ def novo_ponto_bolsao():
             conn = get_db_connection()
             conn.execute('''
                 INSERT INTO pontos_bolsao
-                    (point_pack_number, responsavel, projetos, pontos, used_amount, registration_date, expiration_date)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                    (point_pack_number, responsavel, projetos, pontos, used_amount, registration_date, expiration_date, previsao_inicio, tempo_projeto_meses)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''', (
                 request.form['point_pack_number'],
                 request.form['responsavel'],
@@ -208,6 +221,8 @@ def novo_ponto_bolsao():
                 float(request.form.get('used_amount') or 0),
                 request.form['registration_date'],
                 request.form['expiration_date'],
+                request.form.get('previsao_inicio') or None,
+                int(request.form['tempo_projeto_meses']) if request.form.get('tempo_projeto_meses') else None,
             ))
             conn.commit()
             conn.close()
