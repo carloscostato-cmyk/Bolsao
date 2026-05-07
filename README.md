@@ -164,7 +164,9 @@ Diferença   = Pontos Calculados − Pontos Fortinet
 - Queries com parâmetros `?` — proteção contra SQL injection
 - `secret_key` configurada para proteção de sessão Flask
 - WAL mode no SQLite — evita `database is locked` em produção
+- `foreign_keys=ON` e `synchronous=FULL` no SQLite — melhora a integridade e a durabilidade das gravações
 - Backups automáticos do arquivo `sistema.db` são gerados em `backups/` após cadastros e importações
+- Um backup de inicialização é gerado quando a aplicação sobe e encontra `sistema.db`
 - A rota administrativa de limpeza do banco fica desativada por padrão e só pode ser habilitada com `ALLOW_DB_RESET=1`
 
 > Observação importante: backup local ajuda contra erro humano e falhas simples, mas não substitui um banco persistente fora do disco da aplicação. Em ambiente hospedado, o ideal é usar um disco persistente ou migrar para um banco gerenciado.

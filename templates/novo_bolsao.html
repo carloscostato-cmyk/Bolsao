@@ -69,11 +69,13 @@
                     <div class="grid-3">
                         <div class="form-group">
                             <label for="registration_date">Data Registro</label>
-                            <input type="date" name="registration_date" required>
+                            <input type="date" name="registration_date" id="registration_date" required>
+                            <small style="color:#666;font-size:12px;margin-top:4px;display:block;">Formato: AAAA-MM-DD</small>
                         </div>
                         <div class="form-group">
                             <label for="expiration_date">Data Expiração</label>
-                            <input type="date" name="expiration_date" required>
+                            <input type="date" name="expiration_date" id="expiration_date" required>
+                            <small style="color:#666;font-size:12px;margin-top:4px;display:block;">Deve ser maior que data de registro</small>
                         </div>
                         <div class="form-group">
                             <label for="previsao_inicio">Previsão Início</label>
@@ -98,6 +100,41 @@
             var usados = parseFloat(document.getElementById('used_amount').value) || 0;
             document.getElementById('remaining_amount').value = (pontos - usados).toFixed(2);
         }
+
+        function validateDates() {
+            var regDate = document.getElementById('registration_date').value;
+            var expDate = document.getElementById('expiration_date').value;
+
+            if (!regDate || !expDate) {
+                return true; // Validação padrão do HTML5 vai cuidar
+            }
+
+            var reg = new Date(regDate);
+            var exp = new Date(expDate);
+
+            // Validar se data de expiração é após data de registro
+            if (exp <= reg) {
+                alert('Data de Expiração deve ser posterior à Data de Registro!');
+                return false;
+            }
+
+            // Validar se ano está realista (2020-2030)
+            var regYear = reg.getFullYear();
+            var expYear = exp.getFullYear();
+            if (regYear < 2020 || regYear > 2030 || expYear < 2020 || expYear > 2030) {
+                alert('Ano deve estar entre 2020 e 2030. Verifique as datas inseridas.');
+                return false;
+            }
+
+            return true;
+        }
+
+        // Validar ao submeter formulário
+        document.querySelector('form').addEventListener('submit', function(e) {
+            if (!validateDates()) {
+                e.preventDefault();
+            }
+        });
     </script>
 </body>
 </html>

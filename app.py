@@ -28,6 +28,8 @@ def login_required(f):
 def init_db():
     conn = sqlite3.connect(DB_PATH, timeout=30)
     conn.execute("PRAGMA journal_mode=WAL")
+    conn.execute("PRAGMA synchronous=FULL")
+    conn.execute("PRAGMA foreign_keys=ON")
     cur = conn.cursor()
     cur.execute('''
         CREATE TABLE IF NOT EXISTS pontos_bolsao (
@@ -72,6 +74,8 @@ def get_db_connection():
     conn = sqlite3.connect(DB_PATH, timeout=30, check_same_thread=False)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA journal_mode=WAL")
+    conn.execute("PRAGMA synchronous=FULL")
+    conn.execute("PRAGMA foreign_keys=ON")
     conn.execute("PRAGMA busy_timeout=30000")
     return conn
 
@@ -86,6 +90,10 @@ def backup_database(label='snapshot'):
     backup_path = os.path.join(BACKUP_DIR, filename)
     shutil.copy2(DB_PATH, backup_path)
     return backup_path
+
+
+if os.path.exists(DB_PATH):
+    backup_database('startup')
 
 
 # ── Autenticação ──────────────────────────────────────────────────────────────
@@ -173,6 +181,20 @@ def novo_ponto_bolsao():
     erro = None
     if request.method == 'POST':
         try:
+            reg_date_str = request.form['registration_date']
+            exp_date_str = request.form['expiration_date']
+            
+            reg_date = datetime.strptime(reg_date_str, '%Y-%m-%d')
+            exp_date = datetime.strptime(exp_date_str, '%Y-%m-%d')
+            
+            if exp_date <= reg_date:
+                erro = 'Data de Expiração deve ser posterior à Data de Registro.'
+                return render_template('novo_bolsao.html', erro=erro)
+            
+            if reg_date.year < 2020 or reg_date.year > 2030 or exp_date.year < 2020 or exp_date.year > 2030:
+                erro = 'Ano deve estar entre 2020 e 2030. Verifique as datas inseridas.'
+                return render_template('novo_bolsao.html', erro=erro)
+            
             conn = get_db_connection()
             conn.execute('''
                 INSERT INTO pontos_bolsao
@@ -235,24 +257,48 @@ def listar_pontos_utilizados():
 @login_required
 def novo_ponto_utilizado():
     if request.method == 'POST':
-        conn = get_db_connection()
-        conn.execute('''
-            INSERT INTO pontos_utilizados
-                (bolsao_id, serial_number, dados_cliente, product_model, valor_pontos_dia, data_aplicacao, data_fim)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        ''', (
-            request.form['bolsao_id'],
-            request.form['serial_number'],
-            request.form['dados_cliente'],
-            request.form['product_model'],
-            float(request.form['valor_pontos_dia']),
-            request.form['data_aplicacao'],
-            request.form.get('data_fim') or None,
-        ))
-        conn.commit()
-        conn.close()
-        backup_database('pontos_utilizados')
-        return redirect(url_for('listar_pontos_utilizados'))
+        try:
+            apl_date_str = request.form['data_aplicacao']
+            fim_date_str = request.form.get('data_fim') or None
+            
+            apl_date = datetime.strptime(apl_date_str, '%Y-%m-%d')
+            
+            if apl_date.year < 2020 or apl_date.year > 2030:
+                flash('Ano da Data Aplicação deve estar entre 2020 e 2030.', 'erro')
+                return redirect(url_for('novo_ponto_utilizado'))
+            
+            if fim_date_str:
+                fim_date = datetime.strptime(fim_date_str, '%Y-%m-%d')
+                
+                if fim_date.year < 2020 or fim_date.year > 2030:
+                    flash('Ano da Data Fim deve estar entre 2020 e 2030.', 'erro')
+                    return redirect(url_for('novo_ponto_utilizado'))
+                
+                if fim_date <= apl_date:
+                    flash('Data Fim deve ser posterior à Data Aplicação!', 'erro')
+                    return redirect(url_for('novo_ponto_utilizado'))
+            
+            conn = get_db_connection()
+            conn.execute('''
+                INSERT INTO pontos_utilizados
+                    (bolsao_id, serial_number, dados_cliente, product_model, valor_pontos_dia, data_aplicacao, data_fim)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                request.form['bolsao_id'],
+                request.form['serial_number'],
+                request.form['dados_cliente'],
+                request.form['product_model'],
+                float(request.form['valor_pontos_dia']),
+                request.form['data_aplicacao'],
+                request.form.get('data_fim') or None,
+            ))
+            conn.commit()
+            conn.close()
+            backup_database('pontos_utilizados')
+            return redirect(url_for('listar_pontos_utilizados'))
+        except Exception as e:
+            flash(f'Erro ao salvar: {str(e)}', 'erro')
+            return redirect(url_for('novo_ponto_utilizado'))
 
     conn = get_db_connection()
     bolsoes = conn.execute('''

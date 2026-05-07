@@ -53,12 +53,14 @@
                         </div>
                         <div class="form-group">
                             <label for="data_aplicacao">Data Aplicação</label>
-                            <input type="date" name="data_aplicacao" required>
+                            <input type="date" name="data_aplicacao" id="data_aplicacao" required>
+                            <small style="color:#666;font-size:12px;margin-top:4px;display:block;">Formato: AAAA-MM-DD</small>
                         </div>
                     </div>
                     <div class="form-group">
                         <label for="data_fim">Data Fim (opcional)</label>
-                        <input type="date" name="data_fim">
+                        <input type="date" name="data_fim" id="data_fim">
+                        <small style="color:#666;font-size:12px;margin-top:4px;display:block;">Se preenchida, deve ser posterior à Data Aplicação</small>
                     </div>
                 </div>
                 <button type="submit" class="btn-submit">Salvar Consumo</button>
@@ -68,5 +70,47 @@
             <p>Sistema de Controle de Licenças Fortinet</p>
         </footer>
     </div>
+    <script>
+        function validatePontoUtilizadoDates() {
+            var aplDate = document.getElementById('data_aplicacao').value;
+            var fimDate = document.getElementById('data_fim').value;
+
+            if (!aplDate) {
+                return true; // Validação padrão do HTML5 vai cuidar
+            }
+
+            var apl = new Date(aplDate);
+            
+            // Validar ano realista (2020-2030)
+            if (apl.getFullYear() < 2020 || apl.getFullYear() > 2030) {
+                alert('Ano da Data Aplicação deve estar entre 2020 e 2030.');
+                return false;
+            }
+
+            // Se data_fim foi preenchida, validar
+            if (fimDate) {
+                var fim = new Date(fimDate);
+                
+                if (fim.getFullYear() < 2020 || fim.getFullYear() > 2030) {
+                    alert('Ano da Data Fim deve estar entre 2020 e 2030.');
+                    return false;
+                }
+                
+                if (fim <= apl) {
+                    alert('Data Fim deve ser posterior à Data Aplicação!');
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        // Validar ao submeter formulário
+        document.querySelector('form').addEventListener('submit', function(e) {
+            if (!validatePontoUtilizadoDates()) {
+                e.preventDefault();
+            }
+        });
+    </script>
 </body>
 </html>
